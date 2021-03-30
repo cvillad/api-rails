@@ -39,7 +39,7 @@ RSpec.describe Article, type: :model do
       recent_article = create(:article) 
       expect(described_class.recent).to eq([recent_article, older_article])
 
-      recent_article.update_column(:created_at:, 2.hours.ago)
+      recent_article.update_column(:created_at, 2.hours.ago)
       expect(described_class.recent).to eq([older_article, recent_article])
     end
   end
