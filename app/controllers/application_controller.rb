@@ -2,12 +2,11 @@ class ApplicationController < ActionController::API
   include JsonapiErrorsHandler
 
   rescue_from UserAuthenticator::AuthenticationError, with: :authentication_error
-  rescue_from ::StandardError, with: lambda { |e| handle_error(e) }
+  rescue_from ActiveRecord::RecordNotFound, with: lambda { |e| handle_error(e) }
 
   ErrorMapper.map_errors!({
     'ActiveRecord::RecordNotFound' => 'JsonapiErrorsHandler::Errors::NotFound'
   })
-  
 
   def render_collection(collection)
     render json: serializer.new(collection)
