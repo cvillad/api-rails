@@ -8,7 +8,10 @@ RSpec.describe '/articles routes' do
     end
   end
   it "routes to articles#show" do
-    id = 1
-    expect(get "/articles/#{id}").to route_to("articles#show", id: "#{id}")
+    expect(get "/articles/1").to route_to("articles#show", id: "1")
+  end
+
+  it "should route to articles#create" do 
+    expect(post "/articles").to route_to("articles#create")
   end
 end

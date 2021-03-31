@@ -16,8 +16,18 @@ class ArticlesController < ApplicationController
     render json: serializer.new(article)
   end
 
+  def create 
+    Article.create!(article_params)
+  end
+
   def serializer 
     ArticleSerializer
   end
   
+  private 
+
+  def article_params
+     ActionController::Parameters.new
+  end
+
 end
