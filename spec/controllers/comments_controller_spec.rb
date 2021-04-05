@@ -4,10 +4,44 @@ RSpec.describe CommentsController, type: :controller do
   let(:article){create :article}
 
   describe "GET /index" do
+    subject {get :index, params: {article_id: article.id}}
     it "renders a successful response" do
-      get :index, params: {article_id: article.id}
+      subject
       expect(response).to have_http_status(:ok)
     end
+
+    it "should return only comments belonging to article" do 
+      comment = create :comment, article: article 
+      create :comment
+      subject 
+      expect(json_data.length).to eq(1)
+      expect(json_data.first[:id]).to eq(comment.id.to_s)
+    end
+
+    it "should paginate results" do 
+      comments = create_list :comment, 3, article: article 
+      get :index, params: {article_id: article, per_page: 1, page: 2 }
+      expect(json_data.length).to eq(1)
+      comment = comments.second 
+      expect(json_data.first[:id]).to eq(comment.id.to_s)
+    end
+
+    it "should have proper json body" do 
+      comment = create :comment, article: article 
+      subject 
+      expect(json_data.first[:attributes]).to eq({
+        content: comment.content
+      })
+    end
+
+    it "should have related objects information in the response" do 
+      user = create :user
+      comment = create :comment, article: article, user: user
+      subject 
+      relationships = json_data.first[:relationships]
+      expect(relationships[:article][:data][:id]).to eq(article.id.to_s)
+      expect(relationships[:user][:data][:id]).to eq(user.id.to_s)
+    end    
   end
 
   describe "POST /create" do

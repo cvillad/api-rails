@@ -1,11 +1,13 @@
 class CommentsController < ApplicationController
   skip_before_action :authorize!, only: [:index]
-  before_action :load_article, only: [:create]
+  before_action :load_article
   # GET /comments
   def index
-    @comments = Comment.all
-
-    render json: @comments
+    comments = @article.comments.paginate(
+      page: params[:page], 
+      per_page: params[:per_page]
+    )
+    render json: serializer.new(comments)
   end
 
   # POST /comments
@@ -27,5 +29,9 @@ class CommentsController < ApplicationController
 
   def comment_params
     params.require(:comment).permit(:content)
+  end
+
+  def serializer 
+    CommentSerializer
   end
 end
