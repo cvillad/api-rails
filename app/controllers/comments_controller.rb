@@ -13,11 +13,8 @@ class CommentsController < ApplicationController
   # POST /comments
   def create
     @comment = @article.comments.build(comment_params.merge(user: current_user))
-    if @comment.save
-      render json: @comment, status: :created, location: @article
-    else
-      render json: @comment.errors, status: :unprocessable_entity
-    end
+    @comment.save!
+    render json: serializer.new(@comment), status: :created, location: @article
   end
 
 
@@ -28,7 +25,8 @@ class CommentsController < ApplicationController
   end
 
   def comment_params
-    params.require(:comment).permit(:content)
+    params.require(:data).require(:attributes).permit(:content) || 
+    ActionController::Parameters.new
   end
 
   def serializer 
