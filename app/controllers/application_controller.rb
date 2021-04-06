@@ -12,8 +12,8 @@ class ApplicationController < ActionController::API
 
   rescue_from ::StandardError, with: lambda { |e| handle_error(e) }
   rescue_from ActiveRecord::RecordInvalid, with: lambda { |e| handle_validation_error(e) }
-  rescue_from UserAuthenticator::Standard::AuthenticationError, with: lambda {|e| handle_authentication_error(e)}
-  rescue_from UserAuthenticator::Oauth::AuthenticationError, with: lambda {|e| handle_oauth_error(e)}
+  rescue_from UserAuthenticator::Standard::AuthenticationError, with: lambda { handle_auth_error }
+  rescue_from UserAuthenticator::Oauth::AuthenticationError, with: lambda { handle_oauth_error }
 
   def handle_validation_error(error)
     error_model = error.try(:model) || error.try(:record)
@@ -21,7 +21,7 @@ class ApplicationController < ActionController::API
     render_error(mapped)
   end
 
-  def handle_oauth_error(error)
+  def handle_oauth_error
     error = {
       "status": 401,
       "source": { "pointer": "access_token" },
@@ -31,7 +31,7 @@ class ApplicationController < ActionController::API
     render json: { "errors": [ error ] }, status: 401
   end
 
-  def handle_authentication_error(error)
+  def handle_auth_error
     error = {
       "status": 401,
       "source": { "pointer": "/data/attributes/password" },

@@ -28,8 +28,7 @@ class UserAuthenticator::Oauth < UserAuthenticator
 
   def user_data 
     @user_data ||= Octokit::Client.new(
-      access_token: token).user("cvillad"
-      ).to_h.slice(:login, :avatar_url, :url, :name)
+      access_token: token).user.to_h.slice(:login, :avatar_url, :url, :name)
   end
 
   def prepare_user 
