@@ -15,10 +15,32 @@ class ApplicationController < ActionController::API
   rescue_from UserAuthenticator::Standard::AuthenticationError, with: lambda { handle_auth_error }
   rescue_from UserAuthenticator::Oauth::AuthenticationError, with: lambda { handle_oauth_error }
 
+  private 
+
+  def authorize! 
+    raise AuthorizationError unless current_user
+  end
+
+  def access_token 
+    provided_token = request.authorization&.gsub(/\ABearer\s/,"")
+    @access_token = AccessToken.find_by(token: provided_token)
+  end
+
+  def current_user
+    @current_user = access_token&.user
+  end
+
   def handle_validation_error(error)
     error_model = error.try(:model) || error.try(:record)
-    mapped = JsonapiErrorsHandler::Errors::Invalid.new(errors: error_model.errors)
-    render_error(mapped)
+    errors = error_model.errors.reduce([]) do |r, e|
+      r << {
+        source: { pointer: "/data/attributes/#{e.attribute}" },
+        detail: e.message,
+        status: 422,
+        title: "Invalid request"
+      }
+    end
+    render json: { errors: errors }, status: 422
   end
 
   def handle_oauth_error
@@ -39,24 +61,5 @@ class ApplicationController < ActionController::API
       "detail": "You must provide valid credentials.",
     }
     render json: {errors: [error]}, status: 401
-  end
-
-  def render_collection(collection)
-    render json: serializer.new(collection)
-  end
-
-  private 
-
-  def authorize! 
-    raise AuthorizationError unless current_user
-  end
-
-  def access_token 
-    provided_token = request.authorization&.gsub(/\ABearer\s/,"")
-    @access_token = AccessToken.find_by(token: provided_token)
-  end
-
-  def current_user
-    @current_user = access_token&.user
   end
 end

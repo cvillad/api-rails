@@ -26,12 +26,16 @@ describe RegistrationsController do
         subject 
         expect(json[:errors]).to include(
           {
-            source: {pointer: "data/attributes/login"},
-            detail: "can't be blank"
+            source: {pointer: "/data/attributes/login"},
+            detail: "can't be blank",
+            status: 422,
+            title: "Invalid request"
           },
           {
-            source: {pointer: "data/attributes/password"},
-            detail: "can't be blank"
+            source: {pointer: "/data/attributes/password"},
+            detail: "can't be blank",
+            status: 422,
+            title: "Invalid request"
           }
         )
       end

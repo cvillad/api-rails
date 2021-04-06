@@ -8,7 +8,7 @@ class ArticlesController < ApplicationController
       page: pagination_params[:number], 
       per_page: pagination_params[:size]
     )
-    render_collection(articles)
+    render json: serializer.new(articles)
   end
 
   def show

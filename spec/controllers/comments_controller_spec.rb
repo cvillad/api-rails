@@ -89,6 +89,18 @@ RSpec.describe CommentsController, type: :controller do
           expect(response).to have_http_status(:unprocessable_entity)
         end
 
+        it "should return a proper error json" do 
+          subject
+          expect(json[:errors]).to include(
+            {
+              "source": { "pointer": "/data/attributes/content" },
+              "detail": "can't be blank",
+              "status": 422,
+              "title": "Invalid request",
+            }
+          )
+        end
+
         it "does not create a new Comment" do
           expect { subject }.to change(Comment, :count).by(0)
         end
